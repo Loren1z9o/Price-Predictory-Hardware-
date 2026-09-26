@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+# Gerados ao executar
+dados.json
+relatorio/report_data.json
+relatorio/*.pdf
+# Node (geração do relatório)
+node_modules/
+package-lock.json
+# Streamlit / sistema
+.streamlit/secrets.toml
+.DS_Store
+Thumbs.db
