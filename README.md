@@ -1,0 +1,93 @@
+# 🖥️ PC Gamer Price Predictor
+
+Estimativa do preço (R$) de um computador gamer a partir dos seus 8 componentes, comparando
+**Regressão Linear Múltipla** e **K-Vizinhos Mais Próximos (KNN)** com scikit-learn.
+
+Projeto Final da disciplina de **Machine Learning Clássico** · Engenharia de Computação ·
+Centro Universitário UniSATC · 2026
+
+---
+
+## Resultados
+
+| Modelo | MAE validação | MAE teste | R² teste | MAPE teste |
+|---|---|---|---|---|
+| **Regressão Linear** 🏆 | R$ 431 | **R$ 392** | **0,991** | **4,0%** |
+| KNN (K = 11, pesos por distância) | R$ 1.427 | R$ 1.342 | 0,865 | 12,8% |
+
+O modelo foi escolhido pelo MAE de **validação**, e o conjunto de **teste** foi usado uma única vez, depois da escolha.
+
+**Por que a Linear venceu:** o preço de um PC é aditivo, a soma das peças, e é exatamente essa a forma
+que a Regressão Linear assume. Os coeficientes aprendidos recuperam o preço de cada peça do catálogo,
+e o MAPE de 4,0% está no piso imposto pela variação de mercado de ±8% dos dados.
+O KNN fica atrás porque a sua distância mede *quantas* peças são diferentes, não *quanto* elas custam.
+
+<p align="center">
+  <img src="relatorio/fig/f2_coef.png" width="640"><br>
+  <em>Coeficientes aprendidos pela Linear × custo real das peças</em>
+</p>
+
+---
+
+## Como executar
+
+Requisitos: **Python 3.10+**.
+
+```bash
+git clone https://github.com/Loren1z9o/Price-Predictory-Hardware-.git
+cd Price-Predictory-Hardware-
+pip install -r requirements.txt
+
+python -m streamlit run app_streamlit.py   # interface web
+python pc_gamer_ml.py                      # métricas no terminal + gera dados.json
+```
+
+O treino completo leva cerca de 10 segundos e é reprodutível (semente fixa 42).
+
+### A interface
+
+| Aba | Conteúdo |
+|---|---|
+| 🎯 **Preditor** | Monte um PC compatível (socket e DDR filtrados) e veja a estimativa dos dois modelos |
+| 📊 **Resultados** | Métricas, real × previsto, resíduos e EDA do treino |
+| 📘 **Teoria** | Prova, com a sua build, como cada modelo calcula o preço: a soma β₀ + Σβ da Linear e os K vizinhos do KNN, ambos batendo com o `model.predict()` |
+
+---
+
+## Metodologia (sem vazamento de dados)
+
+1. **Dados:** 3.000 builds geradas a partir de um catálogo de 72 peças com preços reais
+   (hardwarebarato.com, KaBuM, Pichau, ago/2026). Preço = soma das peças × variação de mercado de ±8%.
+2. **Split 70/15/15**, estratificado por faixa, feito **antes** de qualquer análise.
+3. **EDA** somente no treino: 0 nulos e 114 outliers pelo IQR (mantidos, pois são builds enthusiast reais).
+4. **One-Hot** dentro de `Pipeline` + `ColumnTransformer`, com fit só no treino:
+   - Linear: `drop='first'` com categorias ordenadas por preço, então cada β é o custo extra da peça em R$;
+   - KNN: One-Hot completo, então duas builds que diferem em *m* peças ficam à distância √(2m).
+5. **KNN otimizado** com `GridSearchCV` (K de 1 a 30 × pesos, CV de 5 dobras no treino).
+6. **Seleção** pelo MAE de validação e **teste usado uma única vez**.
+
+---
+
+## Estrutura
+
+```
+├── pc_gamer_ml.py          # catálogo, geração dos dados, split, EDA, treino, avaliação
+├── app_streamlit.py        # interface: abas Preditor e Resultados
+├── tab_teoria.py           # aba Teoria: funcionamento e provas da Linear e do KNN
+├── requirements.txt
+└── relatorio/
+    ├── Relatorio_PC_Gamer_Predictor_v7.docx   # relatório ABNT
+    ├── gerar_figuras.py    # figuras e números do relatório, a partir do pipeline
+    ├── build.js            # monta o .docx (Node.js + biblioteca docx)
+    └── fig/                # figuras do relatório
+```
+
+Para regerar o relatório: `cd relatorio && python gerar_figuras.py && npm install docx && node build.js`
+
+---
+
+## Autores
+
+**Lorenzo Sartori** · **João Gustavo** · **Lucas Rodrigues Vigarani**
+
+Professor: Prof. Dr. Rodrigo Ramos Silva
