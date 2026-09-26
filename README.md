@@ -6,6 +6,8 @@ Estimativa do preço (R$) de um computador gamer a partir dos seus 8 componentes
 Projeto Final da disciplina de **Machine Learning Clássico** · Engenharia de Computação ·
 Centro Universitário UniSATC · 2026
 
+[![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Loren1z9o/Price-Predictory-Hardware-/blob/main/PC_Gamer_Price_Predictor.ipynb)
+
 ---
 
 ## Resultados
@@ -31,7 +33,11 @@ O KNN fica atrás porque a sua distância mede *quantas* peças são diferentes,
 
 ## Como executar
 
-Requisitos: **Python 3.10+**.
+**Opção 1 · Google Colab (sem instalar nada):** clique no botão *Abrir no Colab* acima e use
+*Ambiente de execução → Executar tudo*. O notebook roda o pipeline completo, célula por célula,
+com as provas de funcionamento dos dois modelos.
+
+**Opção 2 · Local** (requer **Python 3.10+**):
 
 ```bash
 git clone https://github.com/Loren1z9o/Price-Predictory-Hardware-.git
@@ -71,6 +77,7 @@ O treino completo leva cerca de 10 segundos e é reprodutível (semente fixa 42)
 ## Estrutura
 
 ```
+├── PC_Gamer_Price_Predictor.ipynb   # notebook Colab: pipeline completo passo a passo
 ├── pc_gamer_ml.py          # catálogo, geração dos dados, split, EDA, treino, avaliação
 ├── app_streamlit.py        # interface: abas Preditor e Resultados
 ├── tab_teoria.py           # aba Teoria: funcionamento e provas da Linear e do KNN
