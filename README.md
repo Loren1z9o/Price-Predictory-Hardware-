@@ -62,6 +62,29 @@ O treino completo leva cerca de 10 segundos e é reprodutível (semente fixa 42)
 
 ---
 
+## O dataset
+
+O arquivo [`dataset_builds.csv`](dataset_builds.csv) traz as **3.000 builds** usadas no projeto, uma por linha:
+
+| Coluna | Conteúdo |
+| --- | --- |
+| `cpu`, `mobo`, `ram`, `gpu`, `ssd`, `fonte`, `cooler`, `gabinete` | As 8 peças da build |
+| `tier` | Faixa sorteada: entry, budget, mid, high ou enthusiast |
+| `preco` | Preço da build em R$ (alvo da regressão) |
+
+Ele é gerado pela função `gerar_dataset()` do `pc_gamer_ml.py`, com **semente fixa 42**: rodar o projeto
+recria exatamente as mesmas builds, e o CSV é só uma cópia para consulta. Para regerá-lo:
+
+```python
+import pc_gamer_ml as ml
+ml.gerar_dataset(3000).to_csv("dataset_builds.csv", index=False)
+```
+
+> O CSV contém o dataset inteiro, antes do split. A divisão em treino, validação e teste acontece
+> dentro do pipeline, para que nenhuma análise use dados de validação ou de teste.
+
+---
+
 ## Metodologia (sem vazamento de dados)
 
 1. **Dados:** 3.000 builds geradas a partir de um catálogo de 72 peças com preços reais
@@ -80,6 +103,7 @@ O treino completo leva cerca de 10 segundos e é reprodutível (semente fixa 42)
 
 ```
 ├── PC_Gamer_Price_Predictor.ipynb   # notebook Colab: pipeline completo passo a passo
+├── dataset_builds.csv      # as 3.000 builds (gerado com semente 42)
 ├── pc_gamer_ml.py          # catálogo, geração dos dados, split, EDA, treino, avaliação
 ├── app_streamlit.py        # interface: abas Preditor e Resultados
 ├── tab_teoria.py           # aba Teoria: funcionamento e provas da Linear e do KNN
