@@ -14,9 +14,9 @@ Centro Universitário UniSATC · 2026
 
 | Modelo | MAE validação | MAE teste | R² teste | MAPE teste |
 |---|---|---|---|---|
-| **Regressão Linear** 🏆 | R$ 431 | **R$ 392** | **0,991** | **4,0%** |
-| KNN (K = 11, pesos por distância) | R$ 1.427 | R$ 1.342 | 0,865 | 12,8% |
-| Baseline (média do treino) | R$ 4.430 | R$ 4.295 | 0,000 | 56,5% |
+| **Regressão Linear** 🏆 | R$ 511 | **R$ 467** | **0,991** | **4,0%** |
+| KNN (K = 11, pesos por distância) | R$ 1.510 | R$ 1.404 | 0,899 | 11,5% |
+| Baseline (média do treino) | R$ 5.302 | R$ 5.211 | 0,000 | 59,9% |
 
 O baseline (`DummyRegressor`) prevê sempre a média do treino e serve de piso: a Linear reduz o MAE em 90% em relação a ele.
 O modelo foi escolhido pelo MAE de **validação**, e o conjunto de **teste** foi usado uma única vez, depois da escolha.
@@ -88,7 +88,7 @@ ml.gerar_dataset(3000).to_csv("dataset_builds.csv", index=False)
 ## Metodologia (sem vazamento de dados)
 
 1. **Dados:** 3.000 builds geradas a partir de um catálogo de 72 peças com preços reais
-   (hardwarebarato.com, KaBuM, Pichau, ago/2026). Preço = soma das peças × variação de mercado de ±8%.
+   (hardwarebarato.com, KaBuM, Pichau, ago/2026; memórias RAM atualizadas em out/2026, após a alta de preços da DRAM). Preço = soma das peças × variação de mercado de ±8%.
 2. **Split 70/15/15**, estratificado por faixa, feito **antes** de qualquer análise.
 3. **EDA** somente no treino: 0 nulos e 114 outliers pelo IQR (mantidos, pois são builds enthusiast reais).
 4. **One-Hot** dentro de `Pipeline` + `ColumnTransformer`, com fit só no treino:
