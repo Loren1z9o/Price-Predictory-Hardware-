@@ -16,7 +16,9 @@ Centro Universitário UniSATC · 2026
 |---|---|---|---|---|
 | **Regressão Linear** 🏆 | R$ 431 | **R$ 392** | **0,991** | **4,0%** |
 | KNN (K = 11, pesos por distância) | R$ 1.427 | R$ 1.342 | 0,865 | 12,8% |
+| Baseline (média do treino) | R$ 4.430 | R$ 4.295 | 0,000 | 56,5% |
 
+O baseline (`DummyRegressor`) prevê sempre a média do treino e serve de piso: a Linear reduz o MAE em 90% em relação a ele.
 O modelo foi escolhido pelo MAE de **validação**, e o conjunto de **teste** foi usado uma única vez, depois da escolha.
 
 **Por que a Linear venceu:** o preço de um PC é aditivo, a soma das peças, e é exatamente essa a forma
