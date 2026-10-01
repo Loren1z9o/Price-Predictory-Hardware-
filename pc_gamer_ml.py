@@ -21,6 +21,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 SEED = 42
@@ -245,6 +246,12 @@ def treinar(n=3000):
                             "pesos": r["param_modelo__weights"].astype(str),
                             "MAE_cv": -r["mean_test_score"]})
 
+    # Baseline — DummyRegressor: prevê sempre a média do treino. Serve de piso:
+    # um modelo só é útil se tiver MAE bem menor que este (não entra na seleção).
+    dummy = DummyRegressor(strategy="mean").fit(X_tr, y_tr)
+    cv_dummy = -cross_val_score(DummyRegressor(strategy="mean"), X_tr, y_tr, cv=cv,
+                                scoring="neg_mean_absolute_error").mean()
+
     modelos = {"Linear": lin, "KNN": knn}
     val = {m: metricas(y_va, p.predict(X_va)) for m, p in modelos.items()}
     melhor = min(val, key=lambda m: val[m]["MAE"])       # decisão pela validação
@@ -257,6 +264,9 @@ def treinar(n=3000):
                        "pesos": grid.best_params_["modelo__weights"]},
         "cv_mae": {"Linear": float(cv_lin), "KNN": float(-grid.best_score_)},
         "validacao": val, "teste": teste,
+        "baseline": {"cv_mae": float(cv_dummy),
+                     "validacao": metricas(y_va, dummy.predict(X_va)),
+                     "teste": metricas(y_te, dummy.predict(X_te))},
         "pred_teste": {m: p.predict(X_te) for m, p in modelos.items()},
         "eda": resumo_eda(X_tr, y_tr, df.loc[X_tr.index, "tier"]),
         "split": {"treino": len(X_tr), "validacao": len(X_va), "teste": len(X_te)},
@@ -302,7 +312,7 @@ def vizinhos_knn(knn, X_tr, y_tr, build):
 
 def salvar_json(res, caminho="dados.json"):
     out = {k: res[k] for k in ["melhor", "knn_params", "cv_mae", "validacao",
-                               "teste", "eda", "split"]}
+                               "teste", "baseline", "eda", "split"]}
     with open(caminho, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 
@@ -314,5 +324,8 @@ if __name__ == "__main__":
         v, t = res["validacao"][m], res["teste"][m]
         print(f"{m:7s} CV MAE R${res['cv_mae'][m]:,.0f} | Val MAE R${v['MAE']:,.0f} "
               f"| Teste MAE R${t['MAE']:,.0f} R² {t['R2']:.3f} MAPE {t['MAPE']:.1f}%")
+    b = res["baseline"]
+    print(f"Baseline CV MAE R${b['cv_mae']:,.0f} | Val MAE R${b['validacao']['MAE']:,.0f} "
+          f"| Teste MAE R${b['teste']['MAE']:,.0f} R² {b['teste']['R2']:.3f} (média do treino)")
     print("Melhor (validação):", res["melhor"])
     salvar_json(res)
