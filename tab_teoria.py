@@ -76,12 +76,18 @@ O treino encontra os β que **minimizam a soma dos erros ao quadrado** (Mínimos
     linhas = [{"Parte": "β₀ (build base: peças mais baratas)", "Peça": "—",
                "Custo extra real": sum(ml.preco(c, ml.itens_por_preco(c)[0]) for c in ml.COLS),
                "β aprendido": b0}]
-    for c in ml.COLS:
+    ordem = list(PLATAFORMA) + [c for c in ml.COLS if c not in PLATAFORMA]
+    for c in ordem:
         r = ref.loc[(c, build[c])]
         linhas.append({"Parte": ml.NOMES_COLS[c], "Peça": build[c],
                        "Custo extra real": r["extra_real"], "β aprendido": r["coef"]})
     tab = pd.DataFrame(linhas)
     manual = tab["β aprendido"].sum()
+    plat = tab[tab["Parte"].isin([ml.NOMES_COLS[k] for k in PLATAFORMA])]
+    sub = pd.DataFrame([{"Parte": "= Subtotal da plataforma", "Peça": "processador + placa-mãe + memória",
+                         "Custo extra real": plat["Custo extra real"].sum(),
+                         "β aprendido": plat["β aprendido"].sum()}])
+    tab = pd.concat([tab.iloc[:1 + len(PLATAFORMA)], sub, tab.iloc[1 + len(PLATAFORMA):]], ignore_index=True)
     pred = float(lin.predict(pd.DataFrame([build])[ml.COLS])[0])
     st.dataframe(tab.style.format({"Custo extra real": brl, "β aprendido": brl}),
                  hide_index=True, width="stretch")
@@ -91,10 +97,12 @@ O treino encontra os β que **minimizam a soma dos erros ao quadrado** (Mínimos
     dif = f"{abs(manual - pred):.2f}".replace(".", ",")
     st.success(f"Os dois valores são iguais (diferença de R$ {dif}): "
                "a predição da Linear é literalmente a soma da tabela acima.")
-    plat = tab[tab["Parte"].isin([ml.NOMES_COLS[k] for k in PLATAFORMA])]
-    st.caption(f"Repare nas linhas de processador, placa-mãe e memória: cada β isolado pode diferir "
-               f"do custo real, mas a **soma das três** ({brl(plat['β aprendido'].sum())}) fica próxima "
-               f"do real ({brl(plat['Custo extra real'].sum())}). O motivo está na Prova 2.")
+    st.info(f"**Por que alguns β da plataforma parecem estranhos (até negativos)?** Processador, placa-mãe "
+            f"e memória sempre aparecem juntos por compatibilidade (AM5 só com DDR5, por exemplo). O modelo "
+            f"vê só o total e não consegue separar quanto é de cada peça: é a **multicolinearidade**. "
+            f"Por isso os β individuais do trio não são interpretáveis, mas o **subtotal** é: "
+            f"{brl(plat['β aprendido'].sum())} aprendido contra {brl(plat['Custo extra real'].sum())} real. "
+            f"As demais peças combinam livremente e têm β próximo do custo real. Detalhes na Prova 2.")
 
     st.subheader("Prova 2: o modelo aprendeu os preços do catálogo")
     st.markdown("Cada ponto é uma peça. No eixo X, o custo extra **real** (tabela de preços); no eixo Y, "

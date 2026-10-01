@@ -41,7 +41,7 @@ with aba_pred:
     sel = lambda col, opcoes, key: st.selectbox(
         ml.NOMES_COLS[col], opcoes, key=key,
         index=opcoes.index(padrao[col]) if padrao.get(col) in opcoes else 0,
-        format_func=lambda k: f"{k}  ·  {brl(ml.preco(col, k))}")
+        )  # sem preço na lista: o preço é o que os modelos precisam estimar
 
     c1, c2 = st.columns(2)
     with c1:
